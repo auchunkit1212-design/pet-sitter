@@ -54,7 +54,7 @@ function ensureStore() {
 }
 
 export async function readBookings(): Promise<BookingRecord[]> {
-  if (shouldUseBlobs()) {
+  if (blobsEnabled()) {
     try {
       return await readFromBlobs()
     } catch {
@@ -72,7 +72,7 @@ export async function readBookings(): Promise<BookingRecord[]> {
 }
 
 export async function writeBookings(bookings: BookingRecord[]) {
-  if (shouldUseBlobs()) {
+  if (blobsEnabled()) {
     try {
       await writeToBlobs(bookings)
       return
