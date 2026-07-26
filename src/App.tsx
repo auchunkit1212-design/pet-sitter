@@ -3,7 +3,7 @@ import './App.css'
 import { BookingPanel } from './components/BookingPanel'
 import { Reveal } from './components/Reveal'
 import { TeamSection } from './components/TeamSection'
-import { IG_HANDLE, IG_URL, WHATSAPP_URL } from './lib/catalog'
+import { BRAND, IG_HANDLE, IG_URL, WHATSAPP_URL } from './lib/catalog'
 
 const galleryPhotos = [
   { src: 'pet-12.jpg', alt: '戶外放狗陪伴' },
@@ -16,13 +16,13 @@ const galleryPhotos = [
   { src: 'pet-01.jpg', alt: '毛孩服務瞬間' },
 ]
 
-type PageTab = 'home' | 'services' | 'pricing' | 'team' | 'booking'
+type PageTab = 'home' | 'about' | 'services' | 'pricing' | 'booking'
 
 const tabs: Array<{ id: PageTab; label: string; href: string }> = [
   { id: 'home', label: '主頁', href: '#top' },
+  { id: 'about', label: '關於', href: '#about' },
   { id: 'services', label: '服務', href: '#services' },
   { id: 'pricing', label: '價錢', href: '#pricing' },
-  { id: 'team', label: '團隊', href: '#team' },
   { id: 'booking', label: '預約付款', href: '#booking' },
 ]
 
@@ -43,7 +43,7 @@ function useActiveTab(): PageTab {
   const [active, setActive] = useState<PageTab>('home')
 
   useEffect(() => {
-    const sectionIds: PageTab[] = ['services', 'pricing', 'team', 'booking']
+    const sectionIds: PageTab[] = ['about', 'services', 'pricing', 'booking']
     const elements = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => Boolean(el))
@@ -88,7 +88,7 @@ export default function App() {
     <>
       <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
         <a className="brand-mark" href="#top">
-          90s Pet Sitter
+          {BRAND}
         </a>
         <nav className="nav-links" aria-label="主要分欄">
           {tabs.map((tab) => (
@@ -110,19 +110,19 @@ export default function App() {
         <section className="hero" aria-label="品牌介紹">
           <div className="hero-media">
             <img
-              src={`${import.meta.env.BASE_URL}photos/pet-12.jpg`}
-              alt="90s Pet Sitter 戶外放狗服務"
+              src={`${import.meta.env.BASE_URL}photos/pet-09.jpg`}
+              alt="Fuwahm 居家寵物照顧"
             />
             <div className="hero-overlay" />
           </div>
           <div className="hero-content">
             <h1 className="hero-brand">
-              90s Pet Sitter
-              <span>90後年輕寵物保姆</span>
+              Fuwahm
+              <span>專屬寵物保姆</span>
             </h1>
-            <p className="hero-line">把你嘅毛孩當自己寶貝一樣照顧</p>
+            <p className="hero-line">留喺最熟悉嘅家，安心被照顧</p>
             <p className="hero-sub">
-              全港上門｜放狗、放貓、餵食、陪伴。線上揀時段，Stripe 即時付款；亦可 WhatsApp／IG DM。
+              Fuwa 代表毛茸茸毛孩，hm 代表溫暖嘅家。全港主要地區上門｜線上揀時段 Stripe 付款，亦可 WhatsApp／IG DM。
             </p>
             <div className="cta-row">
               <a className="btn btn-primary" href="#booking">
@@ -145,13 +145,15 @@ export default function App() {
             ))}
         </div>
 
+        <TeamSection />
+
         <section id="services" className="section">
           <Reveal>
             <div className="section-head">
               <p className="section-kicker">Services</p>
-              <h2>上門照顧，簡單又放心</h2>
+              <h2>Fuwahm 核心服務</h2>
               <p>
-                無論出埠定返工忙碌，都可以放心將毛孩交給 90 後保姆。香港全區上門，揀好時段就可以直接付款。
+                當你需要去旅行、公幹，或者工作太忙，毛孩依然可以留喺屋企，接受透明可靠嘅上門照顧。
               </p>
             </div>
           </Reveal>
@@ -159,8 +161,24 @@ export default function App() {
           <Reveal>
             <div className="services-grid">
               <article className="service-block">
+                <h3>上門照顧（貓／狗）</h3>
+                <p>餵食、換水、清理貓砂／尿墊、溫馨陪玩，讓毛孩喺熟悉環境安心。</p>
+                <ul className="price-list">
+                  <li>
+                    <span className="label">30–40 分鐘</span>
+                    <span className="amount">$180</span>
+                  </li>
+                  <li>
+                    <span className="label">60 分鐘</span>
+                    <span className="amount">$240</span>
+                    <span className="note">以上服務 + 更多陪伴時間</span>
+                  </li>
+                </ul>
+              </article>
+
+              <article className="service-block">
                 <h3>放狗服務</h3>
-                <p>帶毛孩出門活動、嗅嗅世界、消耗精力，回家再報告狀態。</p>
+                <p>30 至 60 分鐘安全散步放電，帶毛孩出門活動後即時匯報。</p>
                 <ul className="price-list">
                   <li>
                     <span className="label">30 分鐘</span>
@@ -176,23 +194,11 @@ export default function App() {
                   </li>
                 </ul>
               </article>
+            </div>
 
-              <article className="service-block">
-                <h3>上門照顧</h3>
-                <p>適合貓狗居家照顧：餵食、換水、清理、陪玩，讓毛孩喺熟悉環境安心。</p>
-                <ul className="price-list">
-                  <li>
-                    <span className="label">30–40 分鐘</span>
-                    <span className="amount">$180</span>
-                    <span className="note">餵食、換水、清理貓砂／便便、簡單陪玩</span>
-                  </li>
-                  <li>
-                    <span className="label">60 分鐘</span>
-                    <span className="amount">$240</span>
-                    <span className="note">以上服務 + 更多陪伴時間</span>
-                  </li>
-                </ul>
-              </article>
+            <div className="service-extra-block">
+              <h3>特別護理</h3>
+              <p>餵口服藥、剪指甲、皮下水注射（視乎情況評估）。預約時可加購，亦可先 WhatsApp 傾清楚。</p>
             </div>
           </Reveal>
         </section>
@@ -201,8 +207,8 @@ export default function App() {
           <Reveal>
             <div className="section-head">
               <p className="section-kicker">Pricing</p>
-              <h2>清楚價錢，方便你預算</h2>
-              <p>費用已包一般交通費（港島、九龍、新界主要地區）。額外服務可喺預約時一併加購。</p>
+              <h2>詳細收費</h2>
+              <p>服務範圍：全港主要地區。費用已包一般交通費；額外同特別護理可喺預約時一併加購。</p>
             </div>
           </Reveal>
 
@@ -211,20 +217,20 @@ export default function App() {
               <button
                 type="button"
                 role="tab"
-                aria-selected={priceTab === 'walk'}
-                className={`tab${priceTab === 'walk' ? ' is-active' : ''}`}
-                onClick={() => setPriceTab('walk')}
-              >
-                放狗服務
-              </button>
-              <button
-                type="button"
-                role="tab"
                 aria-selected={priceTab === 'visit'}
                 className={`tab${priceTab === 'visit' ? ' is-active' : ''}`}
                 onClick={() => setPriceTab('visit')}
               >
                 上門照顧
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={priceTab === 'walk'}
+                className={`tab${priceTab === 'walk' ? ' is-active' : ''}`}
+                onClick={() => setPriceTab('walk')}
+              >
+                放狗服務
               </button>
             </div>
 
@@ -248,7 +254,7 @@ export default function App() {
                 <li>
                   <span className="label">Home Visit 30–40 分鐘</span>
                   <span className="amount">$180</span>
-                  <span className="note">餵食、換水、清理貓砂／便便、簡單陪玩</span>
+                  <span className="note">餵食、換水、清理貓砂／尿墊、溫馨陪玩</span>
                 </li>
                 <li>
                   <span className="label">Home Visit 60 分鐘</span>
@@ -260,7 +266,7 @@ export default function App() {
 
             <div className="extras">
               <h3 className="section-kicker" style={{ marginBottom: '0.25rem' }}>
-                Extra
+                Special Care
               </h3>
               <div className="extras-row">
                 <span>修剪指甲</span>
@@ -271,7 +277,7 @@ export default function App() {
                 <span>+$30</span>
               </div>
               <div className="extras-row">
-                <span>皮下水注射（需自備藥品）</span>
+                <span>皮下水注射（需自備藥品／視乎評估）</span>
                 <span>+$80</span>
               </div>
             </div>
@@ -292,28 +298,26 @@ export default function App() {
           </Reveal>
         </section>
 
-        <TeamSection />
-
-        <section className="promise" aria-label="服務承諾">
+        <section className="promise" aria-label="安心保證">
           <Reveal>
             <div className="promise-inner">
               <div className="section-head" style={{ marginBottom: 0 }}>
-                <p className="section-kicker">Why 90s</p>
-                <h2>親切可靠，有溫度嘅照顧</h2>
-                <p>唔止完成任務，而係認真對待每一位毛孩嘅性格同習慣。</p>
+                <p className="section-kicker">Promise</p>
+                <h2>安心保證</h2>
+                <p>透明、可靠，把你嘅毛孩當成自己寶貝一樣看待。</p>
               </div>
               <ul className="promise-list">
                 <li>
-                  <strong>每次即時報告</strong>
-                  <span>服務後即時影相／短片，等你可以放心返工或者出埠。</span>
+                  <strong>即時相片短片匯報</strong>
+                  <span>每次上門均會即時提供相片及短片，等你隨時掌握毛孩狀態。</span>
                 </li>
                 <li>
-                  <strong>線上預約即付款</strong>
-                  <span>揀日期、時段後用 Stripe 安全付款，鎖定保姆時間。</span>
+                  <strong>首次可先見面</strong>
+                  <span>服務前可安排簡單見面，等保姆同毛孩互相認識，令你更加放心。</span>
                 </li>
                 <li>
-                  <strong>WhatsApp 直達</strong>
-                  <span>60391631｜有特別需要可以隨時搵我哋。</span>
+                  <strong>全港主要地區</strong>
+                  <span>WhatsApp 60391631 或 Instagram {IG_HANDLE} 查詢檔期。</span>
                 </li>
               </ul>
             </div>
@@ -339,8 +343,8 @@ export default function App() {
           <Reveal>
             <div className="section-head">
               <p className="section-kicker">Moments</p>
-              <h2>真實照顧瞬間</h2>
-              <p>來自日常服務同毛孩相處嘅真實相片，見證每一段陪伴。</p>
+              <h2>毛孩喺屋企嘅安心時光</h2>
+              <p>真實照顧瞬間，見證 Fuwahm 點樣陪伴每一位寶貝。</p>
             </div>
           </Reveal>
 
@@ -363,8 +367,8 @@ export default function App() {
           <Reveal>
             <div className="section-head">
               <p className="section-kicker">Contact</p>
-              <h2>WhatsApp / Instagram DM</h2>
-              <p>想先傾吓、或者有特別護理需要，歡迎直接聯絡。</p>
+              <h2>準備出門？隨時查詢檔期</h2>
+              <p>歡迎 DM／WhatsApp 查詢及索取詳細收費表。有特別護理需要都可以先傾。</p>
             </div>
             <div className="cta-row">
               <a className="btn btn-primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
@@ -383,9 +387,9 @@ export default function App() {
 
       <footer className="site-footer">
         <p>
-          <strong>90s Pet Sitter</strong>
+          <strong>Fuwahm</strong>
           <br />
-          90後年輕寵物保姆｜香港全區上門
+          專屬寵物保姆｜毛茸茸 × 溫暖嘅家
           <br />
           WhatsApp 60391631｜{IG_HANDLE}
         </p>

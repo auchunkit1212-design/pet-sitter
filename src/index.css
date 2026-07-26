@@ -1,17 +1,17 @@
 :root {
-  --ink: #1a2e28;
-  --ink-soft: #3d564d;
-  --leaf: #2f6b56;
-  --leaf-deep: #1f4a3c;
-  --leaf-bright: #3f8a6e;
-  --mist: #e7f2ec;
-  --sky: #cfe8e0;
-  --sun: #f0b429;
-  --sun-deep: #d99a12;
-  --paper: #f7faf8;
+  --ink: #2c2623;
+  --ink-soft: #5c5358;
+  --leaf: #6b8f8a;
+  --leaf-deep: #3f5a68;
+  --leaf-bright: #7fa39d;
+  --mist: #eef4f2;
+  --sky: #d9e7e4;
+  --sun: #f0c27a;
+  --sun-deep: #d9a45a;
+  --paper: #f7f5f2;
   --white: #ffffff;
-  --line: rgba(26, 46, 40, 0.12);
-  --shadow: 0 18px 40px rgba(26, 46, 40, 0.12);
+  --line: rgba(44, 38, 35, 0.12);
+  --shadow: 0 18px 40px rgba(44, 38, 35, 0.1);
   --font-display: "Bricolage Grotesque", "Noto Sans TC", sans-serif;
   --font-body: "Noto Sans TC", sans-serif;
   --radius: 18px;
@@ -39,9 +39,9 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(47, 107, 86, 0.16), transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, rgba(240, 180, 41, 0.14), transparent 50%),
-    linear-gradient(180deg, #eef7f2 0%, var(--paper) 35%, #f4f8f6 100%);
+    radial-gradient(1200px 600px at 8% -12%, rgba(107, 143, 138, 0.22), transparent 55%),
+    radial-gradient(900px 520px at 100% 0%, rgba(240, 194, 122, 0.18), transparent 52%),
+    linear-gradient(180deg, #eef3f2 0%, var(--paper) 38%, #f3f1ee 100%);
 }
 
 img {
@@ -600,6 +600,54 @@ p {
   font-family: var(--font-display);
 }
 
+.about-story {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.about-lead {
+  display: grid;
+  gap: 1.1rem;
+  align-items: start;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.about-lead p {
+  color: var(--ink-soft);
+  line-height: 1.75;
+}
+
+.about-lead h3 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.2rem;
+}
+
+.about-points .team-member {
+  border-bottom: none;
+  padding: 1rem 0 0;
+}
+
+.service-extra-block {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.service-extra-block h3 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.service-extra-block p {
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 52ch;
+}
+
 .team-grid {
   display: grid;
   gap: 1.25rem;
@@ -955,6 +1003,12 @@ p {
   .gallery figure:nth-child(3) {
     grid-column: auto;
     aspect-ratio: 4 / 5;
+  }
+
+  .about-lead {
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: center;
   }
 
   .team-grid {

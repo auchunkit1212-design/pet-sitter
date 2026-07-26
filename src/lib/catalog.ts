@@ -56,7 +56,7 @@ export const SERVICES: ServiceOption[] = [
     durationLabel: '30–40 分鐘',
     durationMinutes: 40,
     priceHkd: 180,
-    note: '餵食、換水、清理貓砂／便便、簡單陪玩',
+    note: '餵食、換水、清理貓砂／尿墊、溫馨陪玩',
   },
   {
     id: 'visit-60',
@@ -96,8 +96,9 @@ export const TIME_SLOTS = [
 
 export const WHATSAPP_NUMBER = '85260391631'
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`
-export const IG_URL = 'https://www.instagram.com/90s.petsitter/'
-export const IG_HANDLE = '@90s.petsitter'
+export const IG_URL = 'https://www.instagram.com/fuwahm.petsitter/'
+export const IG_HANDLE = '@Fuwahm.petsitter'
+export const BRAND = 'Fuwahm'
 
 export function getService(id: ServiceId) {
   return SERVICES.find((s) => s.id === id)
