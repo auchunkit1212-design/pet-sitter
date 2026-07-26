@@ -3,7 +3,8 @@ import './App.css'
 import { BookingPanel } from './components/BookingPanel'
 import { Reveal } from './components/Reveal'
 import { TeamSection } from './components/TeamSection'
-import { BRAND, IG_HANDLE, IG_URL, WHATSAPP_URL } from './lib/catalog'
+import { TermsSection } from './components/TermsSection'
+import { BRAND, IG_HANDLE, IG_URL, WHATSAPP_DISPLAY, WHATSAPP_URL } from './lib/catalog'
 
 const galleryPhotos = [
   { src: 'pet-12.jpg', alt: '戶外放狗陪伴' },
@@ -16,14 +17,15 @@ const galleryPhotos = [
   { src: 'pet-01.jpg', alt: '毛孩服務瞬間' },
 ]
 
-type PageTab = 'home' | 'about' | 'services' | 'pricing' | 'booking'
+type PageTab = 'home' | 'about' | 'services' | 'pricing' | 'booking' | 'terms'
 
 const tabs: Array<{ id: PageTab; label: string; href: string }> = [
   { id: 'home', label: '主頁', href: '#top' },
   { id: 'about', label: '關於', href: '#about' },
   { id: 'services', label: '服務', href: '#services' },
   { id: 'pricing', label: '價錢', href: '#pricing' },
-  { id: 'booking', label: '預約付款', href: '#booking' },
+  { id: 'booking', label: '預約', href: '#booking' },
+  { id: 'terms', label: '守則', href: '#terms' },
 ]
 
 function useScrolled(threshold = 24) {
@@ -43,7 +45,7 @@ function useActiveTab(): PageTab {
   const [active, setActive] = useState<PageTab>('home')
 
   useEffect(() => {
-    const sectionIds: PageTab[] = ['about', 'services', 'pricing', 'booking']
+    const sectionIds: PageTab[] = ['about', 'services', 'pricing', 'booking', 'terms']
     const elements = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => Boolean(el))
@@ -82,7 +84,7 @@ function useActiveTab(): PageTab {
 export default function App() {
   const scrolled = useScrolled()
   const activeTab = useActiveTab()
-  const [priceTab, setPriceTab] = useState<'walk' | 'visit'>('walk')
+  const [priceTab, setPriceTab] = useState<'walk' | 'visit'>('visit')
 
   return (
     <>
@@ -122,14 +124,14 @@ export default function App() {
             </h1>
             <p className="hero-line">留喺最熟悉嘅家，安心被照顧</p>
             <p className="hero-sub">
-              Fuwa 代表毛茸茸毛孩，hm 代表溫暖嘅家。全港主要地區上門｜線上揀時段 Stripe 付款，亦可 WhatsApp／IG DM。
+              Fuwa 代表毛茸茸毛孩，hm 代表溫暖嘅家。全港主要地區上門｜線上揀時段，WhatsApp 確認檔期同付款。
             </p>
             <div className="cta-row">
               <a className="btn btn-primary" href="#booking">
-                線上預約並付款
+                線上預約
               </a>
               <a className="btn btn-ghost" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
-                WhatsApp 60391631
+                WhatsApp {WHATSAPP_DISPLAY}
               </a>
             </div>
           </div>
@@ -288,11 +290,12 @@ export default function App() {
               <li>公眾假期 +$50／次</li>
               <li>偏遠地區（離島／偏遠新界）視乎交通另議</li>
               <li>餵藥／特別護理 +$20–50</li>
+              <li>代購糧食／用品：實報實銷 +$50 跑腿費</li>
             </ul>
 
             <div className="cta-row" style={{ marginTop: '1.75rem' }}>
               <a className="btn btn-primary" href="#booking">
-                去預約日曆付款
+                去預約日曆
               </a>
             </div>
           </Reveal>
@@ -316,8 +319,10 @@ export default function App() {
                   <span>服務前可安排簡單見面，等保姆同毛孩互相認識，令你更加放心。</span>
                 </li>
                 <li>
-                  <strong>全港主要地區</strong>
-                  <span>WhatsApp 60391631 或 Instagram {IG_HANDLE} 查詢檔期。</span>
+                  <strong>WhatsApp 預約同付款</strong>
+                  <span>
+                    揀好時段後直接 WhatsApp {WHATSAPP_DISPLAY} 確認檔期同俾錢方式；亦可 IG {IG_HANDLE}。
+                  </span>
                 </li>
               </ul>
             </div>
@@ -327,10 +332,10 @@ export default function App() {
         <section id="booking" className="section booking-section">
           <Reveal>
             <div className="section-head">
-              <p className="section-kicker">Book & Pay</p>
-              <h2>預約日曆：揀時段，即刻俾錢</h2>
+              <p className="section-kicker">Book</p>
+              <h2>預約日曆：揀時段，WhatsApp 確認</h2>
               <p>
-                揀服務 → 揀日期同時間 → 填資料 → Stripe 付款。付款成功即鎖定時段。
+                揀服務 → 揀日期同時間 → 填資料 → 一鍵開 WhatsApp 確認檔期同付款。
               </p>
             </div>
           </Reveal>
@@ -338,6 +343,8 @@ export default function App() {
             <BookingPanel />
           </Reveal>
         </section>
+
+        <TermsSection />
 
         <section id="gallery" className="section">
           <Reveal>
@@ -367,12 +374,12 @@ export default function App() {
           <Reveal>
             <div className="section-head">
               <p className="section-kicker">Contact</p>
-              <h2>準備出門？隨時查詢檔期</h2>
-              <p>歡迎 DM／WhatsApp 查詢及索取詳細收費表。有特別護理需要都可以先傾。</p>
+              <h2>準備出門？隨時 WhatsApp 查詢</h2>
+              <p>歡迎 WhatsApp／IG DM 查詢檔期、收費同付款安排。有特別護理需要都可以先傾。</p>
             </div>
             <div className="cta-row">
               <a className="btn btn-primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
-                WhatsApp 60391631
+                WhatsApp {WHATSAPP_DISPLAY}
               </a>
               <a className="btn btn-solid" href={IG_URL} target="_blank" rel="noreferrer">
                 Instagram {IG_HANDLE}
@@ -391,7 +398,9 @@ export default function App() {
           <br />
           專屬寵物保姆｜毛茸茸 × 溫暖嘅家
           <br />
-          WhatsApp 60391631｜{IG_HANDLE}
+          WhatsApp {WHATSAPP_DISPLAY}｜{IG_HANDLE}
+          <br />
+          <a href="#terms">服務守則與免責條款</a>
         </p>
       </footer>
     </>

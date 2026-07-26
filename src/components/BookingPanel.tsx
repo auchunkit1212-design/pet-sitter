@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   EXTRAS,
   SERVICES,
   TIME_SLOTS,
+  WHATSAPP_NUMBER,
   calcTotal,
+  getService,
   type ExtraId,
   type ServiceId,
 } from '../lib/catalog'
-import { createCheckout, fetchAvailability, fetchCheckoutStatus } from '../lib/api'
 
 function pad(n: number) {
   return String(n).padStart(2, '0')
@@ -37,6 +38,17 @@ function buildMonthMatrix(year: number, month: number) {
   return cells
 }
 
+function isSlotPast(date: string, slot: string) {
+  const now = new Date()
+  const today = toDateKey(now)
+  if (date < today) return true
+  if (date > today) return false
+  const [hh, mm] = slot.split(':').map(Number)
+  const slotDate = new Date(now)
+  slotDate.setHours(hh, mm, 0, 0)
+  return slotDate.getTime() <= now.getTime() + 60 * 60 * 1000
+}
+
 const weekdays = ['一', '二', '三', '四', '五', '六', '日']
 
 export function BookingPanel() {
@@ -52,79 +64,20 @@ export function BookingPanel() {
   const [extras, setExtras] = useState<ExtraId[]>([])
   const [date, setDate] = useState(toDateKey(today))
   const [time, setTime] = useState('')
-  const [bookedSlots, setBookedSlots] = useState<string[]>([])
-  const [loadingSlots, setLoadingSlots] = useState(false)
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [district, setDistrict] = useState('')
   const [petInfo, setPetInfo] = useState('')
   const [notes, setNotes] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [agreed, setAgreed] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState<{
-    serviceName: string
-    date: string
-    time: string
-    totalHkd: number
-  } | null>(null)
 
   const total = calcTotal(serviceId, extras)
+  const service = getService(serviceId)
   const matrix = useMemo(
     () => buildMonthMatrix(monthCursor.getFullYear(), monthCursor.getMonth()),
     [monthCursor],
   )
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const status = params.get('booking')
-    const sessionId = params.get('session_id')
-    if (status === 'success' && sessionId) {
-      fetchCheckoutStatus(sessionId)
-        .then((res) => {
-          if (res.paid && res.booking) setSuccess(res.booking)
-          else setSuccess({
-            serviceName: '預約服務',
-            date: '',
-            time: '',
-            totalHkd: 0,
-          })
-        })
-        .catch(() => {
-          setSuccess({
-            serviceName: '預約服務',
-            date: '',
-            time: '',
-            totalHkd: 0,
-          })
-        })
-    }
-    if (status === 'cancelled') {
-      setError('已取消付款，你可以重新揀時段再試。')
-    }
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    setLoadingSlots(true)
-    setError('')
-    fetchAvailability(date)
-      .then((res) => {
-        if (cancelled) return
-        setBookedSlots(res.bookedSlots)
-        if (res.bookedSlots.includes(time)) setTime('')
-      })
-      .catch((err: Error) => {
-        if (cancelled) return
-        setBookedSlots([])
-        setError(err.message || '無法載入時段，請確認後端 API 已啟動。')
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingSlots(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [date, time])
 
   function toggleExtra(id: ExtraId) {
     setExtras((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -134,58 +87,49 @@ export function BookingPanel() {
     setMonthCursor((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1))
   }
 
-  async function handlePay() {
+  function handleWhatsAppBook() {
     setError('')
     if (!time) {
       setError('請先選擇時段')
       return
     }
-    setSubmitting(true)
-    try {
-      const res = await createCheckout({
-        serviceId,
-        extras,
-        date,
-        time,
-        customerName,
-        customerPhone,
-        district,
-        petInfo,
-        notes,
-      })
-      window.location.href = res.url
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '付款建立失敗')
-      setSubmitting(false)
+    if (!customerName.trim() || !customerPhone.trim() || !district.trim() || !petInfo.trim()) {
+      setError('請填寫姓名、電話、地區同毛孩資料')
+      return
     }
-  }
+    if (!agreed) {
+      setError('請先同意服務守則與免責條款')
+      return
+    }
 
-  if (success) {
-    return (
-      <div className="booking-success">
-        <p className="section-kicker">Paid</p>
-        <h3>預約成功，多謝信任</h3>
-        <p>
-          {success.serviceName}
-          {success.date ? `｜${success.date} ${success.time}` : ''}
-          {success.totalHkd ? `｜HK$${success.totalHkd}` : ''}
-        </p>
-        <p className="muted">我們會盡快 WhatsApp 你確認上門詳情。</p>
-        <button
-          type="button"
-          className="btn btn-solid"
-          onClick={() => {
-            setSuccess(null)
-            const url = new URL(window.location.href)
-            url.searchParams.delete('booking')
-            url.searchParams.delete('session_id')
-            window.history.replaceState({}, '', `${url.pathname}${url.search}#booking`)
-          }}
-        >
-          再預約另一次
-        </button>
-      </div>
-    )
+    const extraNames = extras
+      .map((id) => EXTRAS.find((e) => e.id === id)?.name)
+      .filter(Boolean)
+      .join('、')
+
+    const message = [
+      '你好 Fuwahm，我想預約服務：',
+      '',
+      `服務：${service?.name} ${service?.durationLabel}`,
+      `日期：${date}`,
+      `時間：${time}`,
+      `地區：${district.trim()}`,
+      `毛孩：${petInfo.trim()}`,
+      extraNames ? `額外服務：${extraNames}` : null,
+      `預算約：HK$${total}`,
+      '',
+      `聯絡人：${customerName.trim()}`,
+      `電話：${customerPhone.trim()}`,
+      notes.trim() ? `備註：${notes.trim()}` : null,
+      '',
+      '我想用 WhatsApp 確認檔期同付款方式，謝謝！',
+      '（已閱讀並同意服務守則與免責條款）',
+    ]
+      .filter((line) => line !== null)
+      .join('\n')
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -194,21 +138,21 @@ export function BookingPanel() {
         <section className="booking-card">
           <h3>1. 揀服務</h3>
           <div className="service-options">
-            {SERVICES.map((service) => (
-              <label key={service.id} className={`choice${serviceId === service.id ? ' is-active' : ''}`}>
+            {SERVICES.map((item) => (
+              <label key={item.id} className={`choice${serviceId === item.id ? ' is-active' : ''}`}>
                 <input
                   type="radio"
                   name="service"
-                  checked={serviceId === service.id}
-                  onChange={() => setServiceId(service.id)}
+                  checked={serviceId === item.id}
+                  onChange={() => setServiceId(item.id)}
                 />
                 <span className="choice-main">
                   <strong>
-                    {service.name} · {service.durationLabel}
+                    {item.name} · {item.durationLabel}
                   </strong>
-                  <em>HK${service.priceHkd}</em>
+                  <em>HK${item.priceHkd}</em>
                 </span>
-                {service.note ? <span className="choice-note">{service.note}</span> : null}
+                {item.note ? <span className="choice-note">{item.note}</span> : null}
               </label>
             ))}
           </div>
@@ -263,7 +207,10 @@ export function BookingPanel() {
                     type="button"
                     className={`day${selected ? ' is-selected' : ''}`}
                     disabled={disabled}
-                    onClick={() => setDate(key)}
+                    onClick={() => {
+                      setDate(key)
+                      setTime('')
+                    }}
                   >
                     {cell.getDate()}
                   </button>
@@ -272,20 +219,19 @@ export function BookingPanel() {
             </div>
           </div>
 
-          <p className="mini-label">可選時段 {loadingSlots ? '（載入中…）' : ''}</p>
+          <p className="mini-label">可選時段</p>
           <div className="slot-grid">
             {TIME_SLOTS.map((slot) => {
-              const taken = bookedSlots.includes(slot)
+              const taken = isSlotPast(date, slot)
               return (
                 <button
                   key={slot}
                   type="button"
                   className={`slot${time === slot ? ' is-selected' : ''}`}
-                  disabled={taken || loadingSlots}
+                  disabled={taken}
                   onClick={() => setTime(slot)}
                 >
                   {slot}
-                  {taken ? ' 滿' : ''}
                 </button>
               )
             })}
@@ -293,7 +239,7 @@ export function BookingPanel() {
         </section>
 
         <section className="booking-card">
-          <h3>3. 填資料，即刻 Stripe 付款</h3>
+          <h3>3. 填資料，用 WhatsApp 確認同俾錢</h3>
           <div className="form-grid">
             <label>
               你嘅名
@@ -320,7 +266,7 @@ export function BookingPanel() {
               <input
                 value={petInfo}
                 onChange={(e) => setPetInfo(e.target.value)}
-                placeholder="品種、年齡、隻數"
+                placeholder="品種、年齡、隻數、健康狀況"
               />
             </label>
             <label className="full">
@@ -334,16 +280,24 @@ export function BookingPanel() {
             </label>
           </div>
 
+          <label className="agree-row">
+            <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+            <span>
+              我已閱讀並同意{' '}
+              <a href="#terms">Fuwahm 服務守則與免責條款</a>
+            </span>
+          </label>
+
           <div className="pay-bar">
             <div>
-              <p className="mini-label">應付金額</p>
+              <p className="mini-label">預算金額</p>
               <p className="pay-total">HK${total}</p>
               <p className="muted">
-                {date} {time || '—'}｜安全 Stripe 線上付款
+                {date} {time || '—'}｜下一步用 WhatsApp 確認檔期同付款
               </p>
             </div>
-            <button type="button" className="btn btn-primary" disabled={submitting} onClick={handlePay}>
-              {submitting ? '跳轉付款中…' : '確認並付款'}
+            <button type="button" className="btn btn-primary" onClick={handleWhatsAppBook}>
+              WhatsApp 預約／俾錢
             </button>
           </div>
           {error ? <p className="form-error">{error}</p> : null}

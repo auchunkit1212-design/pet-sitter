@@ -96,9 +96,15 @@ export const TIME_SLOTS = [
 
 export const WHATSAPP_NUMBER = '85260391631'
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`
+export const WHATSAPP_DISPLAY = '60391631'
 export const IG_URL = 'https://www.instagram.com/fuwahm.petsitter/'
 export const IG_HANDLE = '@Fuwahm.petsitter'
 export const BRAND = 'Fuwahm'
+
+export function whatsappLink(text?: string) {
+  if (!text) return WHATSAPP_URL
+  return `${WHATSAPP_URL}?text=${encodeURIComponent(text)}`
+}
 
 export function getService(id: ServiceId) {
   return SERVICES.find((s) => s.id === id)

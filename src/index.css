@@ -698,6 +698,63 @@ p {
   padding-top: 4rem;
 }
 
+.agree-row {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin-top: 1.1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.agree-row input {
+  margin-top: 0.2rem;
+}
+
+.agree-row a {
+  color: var(--leaf-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.terms-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.terms-block {
+  padding: 1.2rem 0 0.2rem;
+  border-top: 1px solid var(--line);
+}
+
+.terms-block h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.terms-block ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.7rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.terms-block strong {
+  color: var(--ink);
+}
+
+.site-footer a {
+  color: var(--leaf-deep);
+  font-weight: 600;
+}
+
 .booking-panel {
   display: grid;
   gap: 1rem;
