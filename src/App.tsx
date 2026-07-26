@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
-
-const IG_URL = 'https://www.instagram.com/90s.petsitter/'
-const IG_HANDLE = '@90s.petsitter'
+import { BookingPanel } from './components/BookingPanel'
+import { Reveal } from './components/Reveal'
+import { TeamSection } from './components/TeamSection'
+import { IG_HANDLE, IG_URL, WHATSAPP_URL } from './lib/catalog'
 
 const galleryPhotos = [
   { src: 'pet-12.jpg', alt: '戶外放狗陪伴' },
@@ -15,7 +16,15 @@ const galleryPhotos = [
   { src: 'pet-01.jpg', alt: '毛孩服務瞬間' },
 ]
 
-type PriceTab = 'walk' | 'visit'
+type PageTab = 'home' | 'services' | 'pricing' | 'team' | 'booking'
+
+const tabs: Array<{ id: PageTab; label: string; href: string }> = [
+  { id: 'home', label: '主頁', href: '#top' },
+  { id: 'services', label: '服務', href: '#services' },
+  { id: 'pricing', label: '價錢', href: '#pricing' },
+  { id: 'team', label: '團隊', href: '#team' },
+  { id: 'booking', label: '預約付款', href: '#booking' },
+]
 
 function useScrolled(threshold = 24) {
   const [scrolled, setScrolled] = useState(false)
@@ -30,48 +39,50 @@ function useScrolled(threshold = 24) {
   return scrolled
 }
 
-function useReveal<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null)
+function useActiveTab(): PageTab {
+  const [active, setActive] = useState<PageTab>('home')
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
+    const sectionIds: PageTab[] = ['services', 'pricing', 'team', 'booking']
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el))
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('is-visible')
-          observer.unobserve(el)
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (visible?.target?.id) {
+          setActive(visible.target.id as PageTab)
         }
       },
-      { threshold: 0.16 },
+      { rootMargin: '-35% 0px -45% 0px', threshold: [0.15, 0.35, 0.6] },
     )
 
-    observer.observe(el)
-    return () => observer.disconnect()
+    elements.forEach((el) => observer.observe(el))
+
+    const onScrollTop = () => {
+      if (window.scrollY < 160) setActive('home')
+    }
+    window.addEventListener('scroll', onScrollTop, { passive: true })
+
+    const hash = window.location.hash.replace('#', '')
+    if (hash && sectionIds.includes(hash as PageTab)) setActive(hash as PageTab)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', onScrollTop)
+    }
   }, [])
 
-  return ref
-}
-
-function Reveal({
-  className = '',
-  children,
-}: {
-  className?: string
-  children: ReactNode
-}) {
-  const ref = useReveal<HTMLDivElement>()
-  return (
-    <div ref={ref} className={`reveal ${className}`.trim()}>
-      {children}
-    </div>
-  )
+  return active
 }
 
 export default function App() {
   const scrolled = useScrolled()
-  const [tab, setTab] = useState<PriceTab>('walk')
+  const activeTab = useActiveTab()
+  const [priceTab, setPriceTab] = useState<'walk' | 'visit'>('walk')
 
   return (
     <>
@@ -79,12 +90,18 @@ export default function App() {
         <a className="brand-mark" href="#top">
           90s Pet Sitter
         </a>
-        <nav className="nav-links" aria-label="主要導覽">
-          <a href="#services">服務</a>
-          <a href="#pricing">價錢</a>
-          <a href="#gallery">相簿</a>
-          <a className="nav-cta" href={IG_URL} target="_blank" rel="noreferrer">
-            DM 預約
+        <nav className="nav-links" aria-label="主要分欄">
+          {tabs.map((tab) => (
+            <a
+              key={tab.id}
+              href={tab.href}
+              className={activeTab === tab.id ? 'is-active' : undefined}
+            >
+              {tab.label}
+            </a>
+          ))}
+          <a className="nav-cta" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+            WhatsApp
           </a>
         </nav>
       </header>
@@ -105,18 +122,28 @@ export default function App() {
             </h1>
             <p className="hero-line">把你嘅毛孩當自己寶貝一樣照顧</p>
             <p className="hero-sub">
-              全港上門｜放狗、放貓、餵食、陪伴。親切可靠，每次即時影相／短片報告。
+              全港上門｜放狗、放貓、餵食、陪伴。線上揀時段，Stripe 即時付款；亦可 WhatsApp／IG DM。
             </p>
             <div className="cta-row">
-              <a className="btn btn-primary" href={IG_URL} target="_blank" rel="noreferrer">
-                Instagram DM 約時間
+              <a className="btn btn-primary" href="#booking">
+                線上預約並付款
               </a>
-              <a className="btn btn-ghost" href="#pricing">
-                睇服務價錢
+              <a className="btn btn-ghost" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                WhatsApp 60391631
               </a>
             </div>
           </div>
         </section>
+
+        <div className="section-tabs" aria-label="內容分欄捷徑">
+          {tabs
+            .filter((t) => t.id !== 'home')
+            .map((tab) => (
+              <a key={tab.id} href={tab.href} className={activeTab === tab.id ? 'is-active' : undefined}>
+                {tab.label}
+              </a>
+            ))}
+        </div>
 
         <section id="services" className="section">
           <Reveal>
@@ -124,7 +151,7 @@ export default function App() {
               <p className="section-kicker">Services</p>
               <h2>上門照顧，簡單又放心</h2>
               <p>
-                無論出埠定返工忙碌，都可以放心將毛孩交給 90 後保姆。香港全區上門，按你同毛孩需要安排時間。
+                無論出埠定返工忙碌，都可以放心將毛孩交給 90 後保姆。香港全區上門，揀好時段就可以直接付款。
               </p>
             </div>
           </Reveal>
@@ -175,7 +202,7 @@ export default function App() {
             <div className="section-head">
               <p className="section-kicker">Pricing</p>
               <h2>清楚價錢，方便你預算</h2>
-              <p>費用已包一般交通費（港島、九龍、新界主要地區）。有特別需要可以先 DM 傾。</p>
+              <p>費用已包一般交通費（港島、九龍、新界主要地區）。額外服務可喺預約時一併加購。</p>
             </div>
           </Reveal>
 
@@ -184,24 +211,24 @@ export default function App() {
               <button
                 type="button"
                 role="tab"
-                aria-selected={tab === 'walk'}
-                className={`tab${tab === 'walk' ? ' is-active' : ''}`}
-                onClick={() => setTab('walk')}
+                aria-selected={priceTab === 'walk'}
+                className={`tab${priceTab === 'walk' ? ' is-active' : ''}`}
+                onClick={() => setPriceTab('walk')}
               >
                 放狗服務
               </button>
               <button
                 type="button"
                 role="tab"
-                aria-selected={tab === 'visit'}
-                className={`tab${tab === 'visit' ? ' is-active' : ''}`}
-                onClick={() => setTab('visit')}
+                aria-selected={priceTab === 'visit'}
+                className={`tab${priceTab === 'visit' ? ' is-active' : ''}`}
+                onClick={() => setPriceTab('visit')}
               >
                 上門照顧
               </button>
             </div>
 
-            {tab === 'walk' ? (
+            {priceTab === 'walk' ? (
               <ul className="price-list">
                 <li>
                   <span className="label">Dog Walking 30 分鐘</span>
@@ -256,8 +283,16 @@ export default function App() {
               <li>偏遠地區（離島／偏遠新界）視乎交通另議</li>
               <li>餵藥／特別護理 +$20–50</li>
             </ul>
+
+            <div className="cta-row" style={{ marginTop: '1.75rem' }}>
+              <a className="btn btn-primary" href="#booking">
+                去預約日曆付款
+              </a>
+            </div>
           </Reveal>
         </section>
+
+        <TeamSection />
 
         <section className="promise" aria-label="服務承諾">
           <Reveal>
@@ -273,15 +308,30 @@ export default function App() {
                   <span>服務後即時影相／短片，等你可以放心返工或者出埠。</span>
                 </li>
                 <li>
-                  <strong>先見面再服務</strong>
-                  <span>首次服務前可安排免費／優惠見面，認識毛孩同屋企環境。</span>
+                  <strong>線上預約即付款</strong>
+                  <span>揀日期、時段後用 Stripe 安全付款，鎖定保姆時間。</span>
                 </li>
                 <li>
-                  <strong>香港全區上門</strong>
-                  <span>港島、九龍、新界主要地區一般交通費已包含。</span>
+                  <strong>WhatsApp 直達</strong>
+                  <span>60391631｜有特別需要可以隨時搵我哋。</span>
                 </li>
               </ul>
             </div>
+          </Reveal>
+        </section>
+
+        <section id="booking" className="section booking-section">
+          <Reveal>
+            <div className="section-head">
+              <p className="section-kicker">Book & Pay</p>
+              <h2>預約日曆：揀時段，即刻俾錢</h2>
+              <p>
+                揀服務 → 揀日期同時間 → 填資料 → Stripe 付款。付款成功即鎖定時段。
+              </p>
+            </div>
+          </Reveal>
+          <Reveal>
+            <BookingPanel />
           </Reveal>
         </section>
 
@@ -312,21 +362,21 @@ export default function App() {
         <section id="contact" className="section contact">
           <Reveal>
             <div className="section-head">
-              <p className="section-kicker">Book</p>
-              <h2>想預約？直接 DM</h2>
-              <p>
-                告訴我毛孩品種、住邊區、需要咩服務同時間，我會盡快覆你安排。
-              </p>
+              <p className="section-kicker">Contact</p>
+              <h2>WhatsApp / Instagram DM</h2>
+              <p>想先傾吓、或者有特別護理需要，歡迎直接聯絡。</p>
             </div>
             <div className="cta-row">
-              <a className="btn btn-primary" href={IG_URL} target="_blank" rel="noreferrer">
-                去 Instagram 預約
+              <a className="btn btn-primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+                WhatsApp 60391631
               </a>
-              <a className="btn btn-solid" href="#pricing">
-                再睇一次價錢
+              <a className="btn btn-solid" href={IG_URL} target="_blank" rel="noreferrer">
+                Instagram {IG_HANDLE}
+              </a>
+              <a className="btn btn-ghost contact-ghost" href="#booking">
+                返回線上預約
               </a>
             </div>
-            <p className="ig-handle">{IG_HANDLE}</p>
           </Reveal>
         </section>
       </main>
@@ -337,7 +387,7 @@ export default function App() {
           <br />
           90後年輕寵物保姆｜香港全區上門
           <br />
-          {IG_HANDLE}
+          WhatsApp 60391631｜{IG_HANDLE}
         </p>
       </footer>
     </>
