@@ -112,8 +112,8 @@ export default function App() {
         <section className="hero" aria-label="品牌介紹">
           <div className="hero-media">
             <img
-              src={`${import.meta.env.BASE_URL}photos/pet-09.jpg`}
-              alt="Fuwahm 居家寵物照顧"
+              src={`${import.meta.env.BASE_URL}photos/pet-12.jpg`}
+              alt="Fuwahm 放狗陪伴，輕輕摸狗頭"
             />
             <div className="hero-overlay" />
           </div>
