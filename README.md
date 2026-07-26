@@ -16,31 +16,38 @@ cp .env.example .env
 npm run dev
 ```
 
-- 前端：http://localhost:5173/pet-sitter/
+- 前端：http://localhost:5173/
 - API：http://localhost:8787
 
-未設定 `STRIPE_SECRET_KEY` 時會以 **Demo 模式**運行。
+未設定 `STRIPE_SECRET_KEY` 時為 **Demo 模式**。
 
-## 接上真實 Stripe
+## 部署到 Netlify（建議）
 
-1. 到 [Stripe Dashboard](https://dashboard.stripe.com/) 建立帳戶
-2. 複製 Secret Key 到 `.env` 的 `STRIPE_SECRET_KEY`
-3. Webhook 指到 `https://你的API網域/api/webhook`，事件選 `checkout.session.completed`
-4. 重啟 `npm run start:api`
+你而家有 Netlify website 的話，直接用得：
 
-## 部署
+1. Netlify → Site configuration → **Link repository** 到呢個 GitHub repo  
+   （或者 Add new site → Import existing project）
+2. Build settings 會讀 `netlify.toml`：
+   - Build command：`npm run build`
+   - Publish directory：`dist`
+3. 加 Environment variables：
+   - `CLIENT_URL` = 你嘅 Netlify 網址（例如 `https://xxxx.netlify.app`）
+   - `STRIPE_SECRET_KEY` = Stripe key（正式收款先要）
+   - `STRIPE_WEBHOOK_SECRET` = webhook secret（建議）
+4. Deploy 之後：
+   - 網站同 `/api/*`（預約／Stripe）都喺同一個 Netlify site
+   - Stripe webhook URL：`https://你的網域/api/webhook`
 
-### 前端（GitHub Pages）
+本機亦可用 Netlify CLI：
 
-`https://auchunkit1212-design.github.io/pet-sitter/`
+```bash
+npx netlify dev
+```
 
-### 後端 API（Stripe 必須）
+## GitHub Pages（可選）
 
-建議用 **Railway** 部署 `server/`：
-
-- Start：`npm run start:api`
-- 環境變數：`STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET`、`CLIENT_URL`
-- 前端建置加：`VITE_API_URL=https://你的API網域`
+仍然支援，但 **Stripe API 唔會跟住去 Pages**。Pages 只係前端。  
+若用 Pages，API 要另外部署，並設定 `VITE_API_URL`。
 
 ## 聯絡
 
